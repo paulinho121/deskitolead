@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "name": "leadflow-pro",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html",
+      "methods": ["GET", "HEAD", "OPTIONS"]
+    }
+  ],
+  "env": {
+    "REACT_APP_SERPER_API_KEY": "@serper-api-key",
+    "GEMINI_API_KEY": "@gemini-api-key"
+  },
+  "build": {
+    "env": {
+      "REACT_APP_SERPER_API_KEY": "@serper-api-key",
+      "GEMINI_API_KEY": "@gemini-api-key"
+    }
+  },
+  "functions": {},
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

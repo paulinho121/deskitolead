@@ -20,7 +20,7 @@ export interface SerperResponse {
 }
 
 export class SerperService {
-  private static readonly API_KEY = process.env.REACT_APP_SERPER_API_KEY || 'SUA_API_KEY_AQUI';
+  private static readonly API_KEY = process.env.REACT_APP_SERPER_API_KEY || process.env.SERPER_API_KEY || 'SUA_API_KEY_AQUI';
   private static readonly BASE_URL = 'https://google.serper.dev/search';
 
   static async searchPlaces(
