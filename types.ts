@@ -33,7 +33,9 @@ export interface Lead {
 export interface SearchFilters {
   keyword: string;
   location: string;
+  state: string;
+  city: string;
   cnae: string;
   radius: number;
-  leadCount: number; // Nova propriedade para quantidade de leads
+  leadCount: number;
 }
