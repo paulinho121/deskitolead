@@ -9,32 +9,54 @@ import LeadDiscovery from './components/LeadDiscovery';
 import BentoDashboard from './components/BentoDashboard';
 import LeadLab from './components/LeadLab';
 import EnrichmentModal from './components/EnrichmentModal';
+import SettingsPage from './components/SettingsPage';
 import { Lead, LeadStatus } from './types';
-import { MOCK_LEADS } from './constants';
+import { LeadService } from './services/leadService';
+import { useEffect } from 'react';
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'discovery' | 'lab'>('dashboard');
-  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'discovery' | 'lab' | 'settings'>('dashboard');
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddLeads = (newLeads: any[]) => {
+  useEffect(() => {
+    const fetchLeads = async () => {
+      setLoading(true);
+      const data = await LeadService.getAllLeads();
+      setLeads(data || []);
+      setLoading(false);
+    };
+    fetchLeads();
+  }, []);
+
+  const handleAddLeads = async (newLeads: any[]) => {
     const formatted: Lead[] = newLeads.map(l => ({
       ...l,
       lastUpdated: new Date().toISOString().split('T')[0],
       status: l.status || 'NEW'
     }));
-    setLeads([...formatted, ...leads]);
+    
+    setLeads(prev => [...formatted, ...prev]);
+    await LeadService.saveLeads(formatted);
     setActiveTab('lab');
   };
 
-  const handleEnrichComplete = (id: string, insights: string, details: any) => {
+  const handleEnrichComplete = async (id: string, insights: string, details: any) => {
     setLeads(prev => prev.map(l => 
       l.id === id ? { ...l, status: LeadStatus.ENRICHED, aiInsights: insights, details } : l
     ));
+    
+    await LeadService.updateLeadStatus(id, LeadStatus.ENRICHED, insights, details);
+    
     if (selectedLead?.id === id) {
       setSelectedLead(prev => prev ? { ...prev, status: LeadStatus.ENRICHED, aiInsights: insights, details } : null);
     }
+  };
+
+  const handleDeleteLead = (id: string) => {
+    setLeads(prev => prev.filter(l => l.id !== id));
   };
 
   return (
@@ -82,8 +104,19 @@ const App: React.FC = () => {
           />
           <div className="pt-8 pb-4">
             <div className="mx-3 h-[1px] bg-gray-200 mb-6" />
-            <NavItem icon={<Activity size={20} />} label="Logs de Atividade" expanded={isSidebarOpen} onClick={() => {}} />
-            <NavItem icon={<Settings size={20} />} label="Configurações" expanded={isSidebarOpen} onClick={() => {}} />
+            <NavItem 
+              icon={<Activity size={20} />} 
+              label="Logs de Atividade" 
+              expanded={isSidebarOpen} 
+              onClick={() => {}} 
+            />
+            <NavItem 
+              icon={<Settings size={20} />} 
+              label="Configurações" 
+              active={activeTab === 'settings'}
+              expanded={isSidebarOpen} 
+              onClick={() => setActiveTab('settings')} 
+            />
           </div>
         </nav>
       </aside>
@@ -101,7 +134,10 @@ const App: React.FC = () => {
             </button>
             <div>
               <h2 className="text-xl font-bold text-gray-800 capitalize">
-                {activeTab === 'dashboard' ? 'Painel Neural' : activeTab === 'discovery' ? 'Laboratório de Extração' : 'Laboratório de Leads'}
+                {activeTab === 'dashboard' ? 'Painel Neural' : 
+                 activeTab === 'discovery' ? 'Laboratório de Extração' : 
+                 activeTab === 'lab' ? 'Laboratório de Leads' : 
+                 'Painel de Controle'}
               </h2>
               <p className="text-xs text-gray-500 font-mono">STATUS: SISTEMAS_NOMINAIS // SYNC_SUCESSO</p>
             </div>
@@ -155,9 +191,14 @@ const App: React.FC = () => {
           )}
           {activeTab === 'lab' && (
             <div className="animate-in fade-in duration-500 h-full">
-              <LeadLab leads={leads} onEnrich={(lead) => setSelectedLead(lead)} />
+              <LeadLab 
+                leads={leads} 
+                onEnrich={(lead) => setSelectedLead(lead)} 
+                onDelete={handleDeleteLead}
+              />
             </div>
           )}
+          {activeTab === 'settings' && <SettingsPage />}
         </div>
       </div>
 

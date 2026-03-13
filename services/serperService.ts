@@ -20,7 +20,13 @@ export interface SerperResponse {
 }
 
 export class SerperService {
-  private static readonly API_KEY = process.env.REACT_APP_SERPER_API_KEY || process.env.SERPER_API_KEY || 'SUA_API_KEY_AQUI';
+  private static getApiKey() {
+    return localStorage.getItem('serper_api_key') || 
+           process.env.REACT_APP_SERPER_API_KEY || 
+           process.env.SERPER_API_KEY || 
+           'SUA_API_KEY_AQUI';
+  }
+  
   private static readonly BASE_URL = 'https://google.serper.dev/search';
 
   static async searchPlaces(
@@ -36,7 +42,7 @@ export class SerperService {
       const response = await fetch(this.BASE_URL, {
         method: 'POST',
         headers: {
-          'X-API-KEY': this.API_KEY,
+          'X-API-KEY': this.getApiKey(),
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

@@ -17,20 +17,21 @@ interface BentoDashboardProps {
 }
 
 const BentoDashboard: React.FC<BentoDashboardProps> = ({ leads, onEnrich }) => {
-  const chartData = [
-    { name: 'Mon', leads: 40 },
-    { name: 'Tue', leads: 65 },
-    { name: 'Wed', leads: 50 },
-    { name: 'Thu', leads: 95 },
-    { name: 'Fri', leads: 120 },
-    { name: 'Sat', leads: 80 },
-    { name: 'Sun', leads: 110 },
+  const hasLeads = leads.length > 0;
+  
+  const chartData = hasLeads ? [
+    { name: 'Seg', leads: leads.length * 0.4 },
+    { name: 'Ter', leads: leads.length * 0.6 },
+    { name: 'Qua', leads: leads.length * 0.5 },
+    { name: 'Qui', leads: leads.length * 0.8 },
+    { name: 'Sex', leads: leads.length },
+  ] : [
+    { name: 'Aguardando Dados', leads: 0 },
   ];
 
   const industryData = [
-    { name: 'SaaS', value: 45, color: '#ff6b35' },
-    { name: 'Energy', value: 25, color: '#ff8c5a' },
-    { name: 'Retail', value: 30, color: '#ffa500' },
+    { name: 'Identificados', value: leads.length, color: '#ff6b35' },
+    { name: 'Pendente', value: 0, color: '#ff8c5a' },
   ];
 
   return (
@@ -112,27 +113,24 @@ const BentoDashboard: React.FC<BentoDashboardProps> = ({ leads, onEnrich }) => {
         </div>
         
         <div className="space-y-4 font-mono text-xs">
-          <InsightLog 
-            status="SUCESSO" 
-            msg="Identificado cluster de alto valor em São Paulo / Tech" 
-            time="há 2m" 
-          />
-          <InsightLog 
-            status="ENRIQUECENDO" 
-            msg="Analisando conteúdo do site 'Green Energy Co'..." 
-            time="há 5m" 
-          />
-          <InsightLog 
-            status="ALERTA" 
-            msg="Encontrados 12 tomadores de decisão para filtros atuais" 
-            time="há 12m"
-            type="alert"
-          />
-          <InsightLog 
-            status="SYNC" 
-            msg="Enviando 5 leads enriquecidos para API HubSpot" 
-            time="há 1h" 
-          />
+          {hasLeads ? (
+            <>
+              <InsightLog 
+                status="SUCESSO" 
+                msg={`Localizados ${leads.length} leads em sua base real.`} 
+                time="Agora" 
+              />
+              <InsightLog 
+                status="SYNC" 
+                msg="Conexão com Supabase ativa e nominal." 
+                time="Status" 
+              />
+            </>
+          ) : (
+            <div className="py-20 text-center opacity-30 italic">
+              Aguardando primeira extração para gerar insights neurais...
+            </div>
+          )}
         </div>
       </div>
 

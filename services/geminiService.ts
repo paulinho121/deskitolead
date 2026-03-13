@@ -1,8 +1,12 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
+const getApiKey = () => {
+  return localStorage.getItem('gemini_api_key') || process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+};
+
 export const analyzeLeadWebsite = async (leadName: string, website: string, industry: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   
   // Since we can't actually scrape live URLs here without a proxy/backend, 
   // we simulate the "content" of the website being passed to Gemini.
@@ -37,7 +41,7 @@ export const analyzeLeadWebsite = async (leadName: string, website: string, indu
 };
 
 export const generateLeadScore = async (leadData: any) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  const ai = new GoogleGenAI({ apiKey: getApiKey() });
   
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
